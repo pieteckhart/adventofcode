@@ -16,10 +16,14 @@ namespace src
                 for (int i1 = i+1; i1 < expenseReport.Count; i1++)
                 {
                     int otherEntry = expenseReport[i1];
-                    if (entry + otherEntry == 2020)
+                    for (int i2 = i1 + 1; i2 < expenseReport.Count; i2++)
                     {
-                        Console.WriteLine(entry * otherEntry);
-                        goto hoi;
+                        int anotherEntry = expenseReport[i2];
+                        if (entry + otherEntry + anotherEntry == 2020)
+                        {
+                            Console.WriteLine(entry * otherEntry * anotherEntry);
+                            goto hoi;
+                        }
                     }
                 }
             }
