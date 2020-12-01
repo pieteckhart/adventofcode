@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -8,27 +9,57 @@ namespace src
     {
         static void Main(string[] args)
         {
-            var expenseReport = File.ReadAllLines("input1.txt").Select(i => int.Parse(i)).ToList();
+            int index = 0;
+            var expenseReport = File.ReadAllLines("input1.txt").Select(e => new Entry(index++, int.Parse(e))).ToList();
 
-            for (int i = 0; i < expenseReport.Count; i++)
+            var product = CreateCombinations(expenseReport, 3)
+                .Where(Is2020)
+                .First().Product();
+
+            Console.WriteLine(product);
+        }
+
+        private static bool Is2020(LinkedNode node) => node.Sum() == 2020;
+
+        private static IEnumerable<LinkedNode> CreateCombinations(IEnumerable<Entry> items, int length)
+        {
+            if (length == 1)
+                return items.Select(item => new LinkedNode { Value = item, Next = null });
+
+            return from a in items
+                   from b in CreateCombinations(items, length - 1)
+                   where !a.Equals(b.Value)
+                   orderby a, b.Value
+                   select new LinkedNode { Value = a, Next = b };
+        }
+
+        public class LinkedNode
+        {
+            public Entry Value { get; set; }
+            public LinkedNode Next { get; set; }
+
+            public override string ToString() => $"{Value} - {Next}";
+
+            public int Sum() => Next != null ? Value.Value + Next.Sum() : Value.Value;
+            public int Product() => Next != null ? Value.Value * Next.Product() : Value.Value;
+        }
+
+        public class Entry : IComparable
+        {
+            public Entry(int index, int value)
             {
-                int entry = expenseReport[i];
-                for (int i1 = i+1; i1 < expenseReport.Count; i1++)
-                {
-                    int otherEntry = expenseReport[i1];
-                    for (int i2 = i1 + 1; i2 < expenseReport.Count; i2++)
-                    {
-                        int anotherEntry = expenseReport[i2];
-                        if (entry + otherEntry + anotherEntry == 2020)
-                        {
-                            Console.WriteLine(entry * otherEntry * anotherEntry);
-                            goto hoi;
-                        }
-                    }
-                }
+                Index = index;
+                Value = value;
             }
-        hoi:
-            Console.WriteLine("Klaar");
+
+            public int Index { get; }
+            public int Value { get; }
+
+            public int CompareTo(object obj) => Value.CompareTo(((Entry)obj).Value);
+
+            public override bool Equals(object obj) => ((Entry)obj).Index.Equals(Index);
+
+            public override string ToString() => $"#{Index}: {Value}";
         }
     }
 }
