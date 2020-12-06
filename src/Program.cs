@@ -10,7 +10,7 @@ namespace src
         static void Main(string[] args)
         {
             int index = 0;
-            var expenseReport = File.ReadAllLines("input1.txt").Select(e => new Entry(index++, int.Parse(e))).ToList();
+            var expenseReport = File.ReadAllLines(@"inputs\day01.txt").Select(e => new Entry(index++, int.Parse(e))).ToList();
 
             var product = CreateCombinations(expenseReport, 3)
                 .Where(Is2020)
