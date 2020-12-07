@@ -11,36 +11,44 @@ namespace Advent
     public class APS
     {
         string regex = @"(\w{3}):([\w+#]+)";
-        private string input;
+        private string[] passports;
 
         public APS(string input)
         {
-            this.input = input;
+            var passports = input.Split(Environment.NewLine+Environment.NewLine);
+            this.passports = passports;
         }
 
         public int GetValidCount()
         {
-            var result = Regex.Matches(input, regex).Select(m => new {key = m.Groups[1].Value, value = m.Groups[2].Value});
-            var passport = new
+            var validCount = 0;
+            foreach (var input in passports)
             {
-                byr = result.FirstOrDefault(g => g.key == "byr"),
-                iyr = result.FirstOrDefault(g => g.key == "iyr"),
-                eyr = result.FirstOrDefault(g => g.key == "eyr"),
-                hgt = result.FirstOrDefault(g => g.key == "hgt"),
-                hcl = result.FirstOrDefault(g => g.key == "hcl"),
-                ecl = result.FirstOrDefault(g => g.key == "ecl"),
-                pid = result.FirstOrDefault(g => g.key == "pid"),
-                cid = result.FirstOrDefault(g => g.key == "cid"),
-            };
+                var result = Regex.Matches(input, regex).Select(m => new {key = m.Groups[1].Value, value = m.Groups[2].Value});
+                var passport = new
+                {
+                    byr = result.FirstOrDefault(g => g.key == "byr"),
+                    iyr = result.FirstOrDefault(g => g.key == "iyr"),
+                    eyr = result.FirstOrDefault(g => g.key == "eyr"),
+                    hgt = result.FirstOrDefault(g => g.key == "hgt"),
+                    hcl = result.FirstOrDefault(g => g.key == "hcl"),
+                    ecl = result.FirstOrDefault(g => g.key == "ecl"),
+                    pid = result.FirstOrDefault(g => g.key == "pid"),
+                    cid = result.FirstOrDefault(g => g.key == "cid"),
+                };
 
-            return      passport.byr != null 
-                     && passport.iyr != null
-                     && passport.eyr != null
-                     && passport.hgt != null 
-                     && passport.hcl != null 
-                     && passport.ecl != null 
-                     && passport.pid != null 
-                ? 1 : 0;
+                validCount = (passport.byr != null
+                       && passport.iyr != null
+                       && passport.eyr != null
+                       && passport.hgt != null
+                       && passport.hcl != null
+                       && passport.ecl != null
+                       && passport.pid != null)
+                    ? validCount +1
+                    : validCount;
+            }
+
+            return validCount;
         }
     }
 }

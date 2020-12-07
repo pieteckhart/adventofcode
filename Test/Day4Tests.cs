@@ -55,5 +55,15 @@ hcl:#cfa07d byr:1929";
 
             Assert.Equal(0, validCount);
         }
+
+        [Fact]
+        public void CountAllValid()
+        {
+            var input = File.ReadAllText(@"inputs\day04.txt"); ;
+
+            var validCount = new APS(input).GetValidCount();
+
+            Assert.Equal(182, validCount);
+        }
     }
 }
