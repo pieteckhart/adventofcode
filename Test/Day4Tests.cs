@@ -59,11 +59,55 @@ hcl:#cfa07d byr:1929";
         [Fact]
         public void CountAllValid()
         {
-            var input = File.ReadAllText(@"inputs\day04.txt"); ;
+            var input = File.ReadAllText(@"inputs\day04.txt");
 
             var validCount = new APS(input).GetValidCount();
 
-            Assert.Equal(182, validCount);
+            Assert.Equal(109, validCount);
+        }
+
+        [Theory]
+        [InlineData("2002", true)]
+        [InlineData("2003", false)]
+        public void byr(string value, bool expected)
+        {
+            Assert.Equal(expected, APS.isBYRvalid(value));
+        }
+
+        [Theory]
+        [InlineData("60in", true)]
+        [InlineData("190cm", true)]
+        [InlineData("190in", false)]
+        [InlineData("190", false)]
+        public void hgt(string value, bool expected)
+        {
+            Assert.Equal(expected, APS.isHGTvalid(value));
+        }
+
+        [Theory]
+        [InlineData("#123abc", true)]
+        [InlineData("#123abz", false)]
+        [InlineData("123abc", false)]
+        public void hcl(string value, bool expected)
+        {
+            Assert.Equal(expected, APS.IsHCLvalid(value));
+        }
+
+        [Theory]
+        [InlineData("brn", true)]
+        [InlineData("wat", false)]
+        public void ecl(string value, bool expected)
+        {
+            Assert.Equal(expected, APS.IsECLvalid(value));
+        }
+
+        [Theory]
+        [InlineData("000000001", true)]
+        [InlineData("0123456789", false)]
+        [InlineData("1234567896", false)]
+        public void pid(string value, bool expected)
+        {
+            Assert.Equal(expected, APS.IsPIDvalid(value));
         }
     }
 }

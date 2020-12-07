@@ -37,18 +37,65 @@ namespace Advent
                     cid = result.FirstOrDefault(g => g.key == "cid"),
                 };
 
-                validCount = (passport.byr != null
-                       && passport.iyr != null
-                       && passport.eyr != null
-                       && passport.hgt != null
-                       && passport.hcl != null
-                       && passport.ecl != null
-                       && passport.pid != null)
-                    ? validCount +1
+                validCount = (passport.byr != null && isBYRvalid(passport.byr.value)
+                       && passport.iyr != null && isIYRvalid(passport.iyr.value)
+                       && passport.eyr != null && isEYRvalid(passport.eyr.value)
+                       && passport.hgt != null && isHGTvalid(passport.hgt.value)
+                       && passport.hcl != null && IsHCLvalid(passport.hcl.value)
+                       && passport.ecl != null && IsECLvalid(passport.ecl.value)
+                       && passport.pid != null) && IsPIDvalid(passport.pid.value)
+                    ? validCount+1
                     : validCount;
             }
 
             return validCount;
         }
+
+        public static bool IsPIDvalid(string value) => Regex.IsMatch(value,@"\A\d{9}\z");
+
+        public static bool IsECLvalid(string value) => value switch
+        {
+            "amb" => true,
+            "blu" => true,
+            "brn" => true,
+            "gry" => true,
+            "grn" => true,
+            "hzl" => true,
+            "oth" => true,
+            _ => false
+        };
+
+        public static bool IsHCLvalid(string value) => Regex.IsMatch(value, @"#[\da-f]{6}");
+
+        public static bool isHGTvalid(string value)
+        {
+            var hgt = Regex.Match(value, @"(\d+)([c-n]{2})");
+            if (!hgt.Success)
+                return false;
+
+            int number = int.Parse(hgt.Groups[1].Value);
+            var unit = hgt.Groups[2].Value;
+
+            return unit switch
+            {
+                "cm" => number >= 150 && number <= 193,
+                "in" => number >= 59 && number <= 76,
+                _ => false
+            };
+        }
+
+        public static bool isEYRvalid(string value) =>
+            int.TryParse(value, out int year)
+            && year >= 2020
+            && year <= 2030;
+
+        public static bool isIYRvalid(string value) =>
+            int.TryParse(value, out int year)
+            && year >= 2010
+            && year <= 2020;
+        public static bool isBYRvalid(string value) =>
+            int.TryParse(value, out int year)
+            && year >= 1920
+            && year <= 2002;
     }
 }
