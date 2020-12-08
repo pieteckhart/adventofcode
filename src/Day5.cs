@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml.Xsl;
 
 namespace Advent
 {
@@ -30,8 +31,30 @@ namespace Advent
             }
             return seatID;
         }
+        public int FindMySeat()
+        {
+            List<int> seatIDs = new List<int>();
+            foreach (var pass in passes)
+            {
+                seatIDs.Add(ScanPass(pass).SeatID);
+            }
 
-        public ScanResult ScanPass(string pass)
+            for (int i = 0; i < 1024; i++)
+            {
+                if    (seatIDs.Any(s => s == i - 1)
+                    && seatIDs.Any(s => s == i + 1)
+                    && !seatIDs.Exists(s => s == i))
+                {
+                    return i;
+                }
+                    
+            }
+            
+            return 0;
+        }
+
+
+        private ScanResult ScanPass(string pass)
         {
             ScanResult result = new ScanResult();
             (int lower, int upper) row = (0, 127);
@@ -53,7 +76,7 @@ namespace Advent
 
             return result;
         }
-
+        
         private (int lower, int upper) ProcessRow((int lower, int upper) startRange, char letter)
         {
             var seatsF = (startRange.upper + startRange.lower -1) / 2;

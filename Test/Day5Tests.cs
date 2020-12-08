@@ -55,5 +55,14 @@ namespace Test
             int highestSeatId = scanner.Scan();
             Assert.Equal(880, highestSeatId);
         }
+
+        [Fact]
+        public void MySeatID()
+        {
+            var input = File.ReadAllText(@"inputs\day05.txt");
+            BoardingPassScanner scanner = new BoardingPassScanner(input);
+            int mySeat = scanner.FindMySeat();
+            Assert.Equal(731, mySeat);
+        }
     }
 }
