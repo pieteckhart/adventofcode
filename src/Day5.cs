@@ -11,29 +11,18 @@ namespace Advent
 {
     public class BoardingPassScanner
     {
-        private string[] passes;
+        private readonly string[] passes;
 
         public BoardingPassScanner(string input)
         {
-            this.passes = input.Split(Environment.NewLine);
+            passes = input.Split(Environment.NewLine);
         }
 
-        public int Scan()
-        {
-            var seatID = 0;
-            foreach (var pass in passes)
-            {
-                var scanResult = ScanPass(pass);
-                if (scanResult.SeatID > seatID)
-                {
-                    seatID = scanResult.SeatID;
-                }
-            }
-            return seatID;
-        }
+        public int Scan() => passes.Select(ScanPass).Max(s => s.SeatID);
+
         public int FindMySeat()
         {
-            List<int> seatIDs = new List<int>();
+            var seatIDs = new List<int>();
             foreach (var pass in passes)
             {
                 seatIDs.Add(ScanPass(pass).SeatID);
@@ -47,83 +36,95 @@ namespace Advent
                 {
                     return i;
                 }
-                    
             }
-            
             return 0;
         }
-
-
+        
         private ScanResult ScanPass(string pass)
         {
-            ScanResult result = new ScanResult();
-            (int lower, int upper) row = (0, 127);
-            for (int i = 0; i < 6; i++)
+            var rowCoding = pass.Take(7).Select(ParseRowCoding);
+            var columnCoding = pass.Skip(7).Take(3).Select(ParseColumnCoding);
+
+            return new ScanResult
             {
-                row = ProcessRow(row, pass[i]);
-            }
-            result.Row = ProcessLastRow(row, pass[6]);
+                Row = GetRowResult(rowCoding),
+                Column = GetColumnResult(columnCoding)
+            };
+        }
 
-            (int lower, int upper) column = (0, 7);
-            for (int i = 7; i < 10; i++)
+        private static ColumnCoding ParseColumnCoding(char c) 
+            => c switch
             {
-                column = ProcessColumn(column, pass[i]);
+                'L' => ColumnCoding.Left,
+                'R' => ColumnCoding.Right
+            };
+
+        private static RowCoding ParseRowCoding(char c)
+            => c switch
+            {
+                'F' => RowCoding.Front,
+                'B' => RowCoding.Back
+            };
+
+        private int GetRowResult(IEnumerable<RowCoding> rowCoding)
+        {
+            var rowRange = (lower: 0, upper: 127);
+            var list = rowCoding.ToList();
+            foreach (var code in list)
+            {
+                rowRange = ReduceRowRange(rowRange, code);
             }
+            return SelectRow(rowRange, list.Last());
+        }
 
-            result.Column = ProcessLastColumn(column, pass[9]);
-
-            result.SeatID = calculateSeatId(result.Row, result.Column);
-
-            return result;
+        private int GetColumnResult(IEnumerable<ColumnCoding> columnCoding)
+        {
+            var column = (lower: 0, upper: 7);
+            var list = columnCoding.ToList();
+            foreach (var code in list)
+            {
+                column = ReduceColumnRange(column, code);
+            }
+            return SelectColumn(column, list.Last());
         }
         
-        private (int lower, int upper) ProcessRow((int lower, int upper) startRange, char letter)
+        private static (int lower, int upper) ReduceRowRange((int lower, int upper) startRange, RowCoding letter)
         {
             var seatsF = (startRange.upper + startRange.lower -1) / 2;
             var seatsB = (startRange.upper + startRange.lower +1) / 2;
 
             return letter switch
             {
-                'F' => (startRange.lower, seatsF),
-                'B' => (seatsB , startRange.upper),
-                _ => default
+                RowCoding.Front => (startRange.lower, seatsF),
+                RowCoding.Back => (seatsB , startRange.upper),
             };
         }
         
-        private int ProcessLastRow((int lower, int upper) row, char letter)
-        {
-            return letter switch
+        private static int SelectRow((int lower, int upper) row, RowCoding letter) =>
+            letter switch
             {
-                'F' => row.lower,
-                'B' => row.upper,
-                _ => default
+                RowCoding.Front => row.lower,
+                RowCoding.Back => row.upper,
             };
-        }
 
-        private (int lower, int upper) ProcessColumn((int lower, int upper) startRange, char letter)
+        private static (int lower, int upper) ReduceColumnRange((int lower, int upper) startRange, ColumnCoding letter)
         {
             var seats = startRange.upper - startRange.lower;
 
             return letter switch
             {
-                'L' => (startRange.lower, (seats - 1) / 2),
-                'R' => ((seats + 1) / 2, startRange.upper),
-                _ => default
-            };
-        }
-        private int ProcessLastColumn((int lower, int upper) column, char letter)
-        {
-            return letter switch
-            {
-                'L' => column.lower,
-                'R' => column.upper,
-                _ => default
+                ColumnCoding.Left => (startRange.lower, (seats - 1) / 2),
+                ColumnCoding.Right => ((seats + 1) / 2, startRange.upper),
             };
         }
 
-        private int calculateSeatId(int row, int column)
+        private static int SelectColumn((int lower, int upper) column, ColumnCoding letter)
         {
-            return row * 8 + column;
+            return letter switch
+            {
+                ColumnCoding.Left => column.lower,
+                ColumnCoding.Right => column.upper,
+            };
         }
     }
 
@@ -131,6 +132,18 @@ namespace Advent
     {
         public int Row { get; set; }
         public int Column { get; set; }
-        public int SeatID { get; set; }
+        public int SeatID => Row * 8 + Column;
+    }
+
+    public enum RowCoding
+    {
+        Front,
+        Back
+    }
+
+    public enum ColumnCoding
+    {
+        Left,
+        Right
     }
 }
