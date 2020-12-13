@@ -22,13 +22,9 @@ namespace Advent
 
         public int FindMySeat()
         {
-            var seatIDs = new List<int>();
-            foreach (var pass in passes)
-            {
-                seatIDs.Add(ScanPass(pass).SeatID);
-            }
+            var seatIDs = passes.Select(pass => ScanPass(pass).SeatID).ToList();
 
-            for (int i = 0; i < 1024; i++)
+            for (var i = 0; i < 1024; i++)
             {
                 if    (seatIDs.Any(s => s == i - 1)
                     && seatIDs.Any(s => s == i + 1)
