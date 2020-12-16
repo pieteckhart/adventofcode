@@ -153,7 +153,7 @@ a";
 
             var scanner = new CustomsDeclarationsScanner(input);
             var sumOfAnswers = scanner.ScanSumUnanimous();
-            Assert.Equal(6590, sumOfAnswers);
+            Assert.Equal(3288, sumOfAnswers);
         }
     }
 }
